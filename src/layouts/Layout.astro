@@ -1,0 +1,172 @@
+---
+// https://github.com/fontsource/font-files/tree/3ef0dc8e3b625831a3ce7d586194c718491b7c6f/fonts/google/jetbrains-mono
+import "@fontsource/jetbrains-mono/400.css";
+import "@fontsource/jetbrains-mono/500.css";
+import { fade, ViewTransitions } from 'astro:transitions'
+
+
+import { SITE_NAME, DESCRIPTION } from '../../src/config'
+
+import RecentPosts from './RecentPosts.jsx';
+
+interface Props {
+	title: string;
+}
+
+// @ts-ignore - TODO figure otu type safety on this
+const { frontmatter } = Astro.props
+
+const isHome = Astro.url.pathname === '/'
+
+const pageTitle = [
+	frontmatter.title ? frontmatter.title : undefined,
+	isHome ? SITE_NAME : undefined,
+].filter(Boolean).join(' | ')
+
+---
+<!doctype html>
+<html lang="en" transition:animate={fade({ duration: '1s' })}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="description" content={DESCRIPTION} />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="https://img.0pt.icu/blogbuilt/avatar.webp" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{pageTitle}</title>
+
+    <ViewTransitions />
+  </head>
+  <body class={`text-gray-500 dark:text-gray-100 ${isHome ? 'is-home' : ''}`}>
+    <div class="max-w-5xl mx-auto space-y-4 py-16 px-14">
+      <header>
+        {!isHome && (
+          <button onclick="history.go(-1)" class="text">⇦back</button>
+        )}
+      </header>
+      <div class="layout">
+        <main class="content max-w-xl">
+          <slot />
+        </main>
+        <aside class="sidebar">
+          <RecentPosts />
+        </aside>
+      </div>
+      <footer>
+        {!isHome && (
+          <a href="/">home</a>
+        )}
+      </footer>
+    </div>
+
+    <script type="module">
+      document.addEventListener('keydown', (event) => {
+        const isSearchPage = window.location.pathname.toLowerCase() === '/search';
+        if (isSearchPage) {
+          return;
+        }
+
+        const isNumberKey = (event.key >= '0' && event.key <= '9') || event.code === 'Digit0';
+
+        if (isNumberKey) {
+          const links = Array.from(document.querySelectorAll('a'));
+          const index = event.key === '0' ? 9 : parseInt(event.key, 10) - 1;
+
+          if (index >= 0 && index < links.length) {
+            window.location.href = links[index].href;
+          }
+        } else if (event.key.toLowerCase() === 'b') {
+          history.back();
+        } else if (event.key.toLowerCase() === 'h') {
+          window.location.href = '/';
+        } else if (event.key.toLowerCase() === 'o') {
+          const targetUrl = 'https://blog.0pt.icu';
+          window.location.href = targetUrl;
+        }
+      });
+    </script>
+  </body>
+</html>
+
+<style is:global>
+  :root {
+    --accent: 136, 58, 234;
+    --accent-light: 224, 204, 250;
+    --accent-dark: 49, 10, 101;
+    --accent-gradient: linear-gradient(
+      45deg,
+      rgb(var(--accent)),
+      rgb(var(--accent-light)) 30%,
+      white 60%
+    );
+  }
+  html {
+    font-family: "JetBrains Mono", system-ui, sans-serif;
+    font-size: 28px;
+    line-height: 1.8rem;
+    background: #13151a;
+    background-size: 224px;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    html {
+      background: #000000;
+    }
+  }
+
+  @media (hover: none) {
+    html {
+      font-size: 18px;
+    }
+    p > a:only-child {
+      padding: 0.5rem 0;
+      display: inline-block;
+    }
+  }
+  code {
+    font-family:
+      Menlo,
+      Monaco,
+      Lucida Console,
+      Liberation Mono,
+      DejaVu Sans Mono,
+      Bitstream Vera Sans Mono,
+      Courier New,
+      monospace;
+  }
+
+  h1 {
+    font-size: 1.1rem;
+    font-style: italic;
+    font-weight: 500;
+    margin-bottom: 0.3rem;
+  }
+
+  body:not(.is-home) a {
+    text-decoration: none;
+  }
+
+  .layout {
+    display: flex;
+    gap: 2rem;
+  }
+
+  .content {
+    flex: 3;
+  }
+
+  .sidebar {
+    flex: 1;
+  }
+
+  button {
+    --accent: 136, 58, 234;
+    --accent-light: 224, 204, 250;
+    --accent-dark: 49, 10, 101;
+    --accent-gradient: linear-gradient(
+      45deg,
+      rgb(var(--accent)),
+      rgb(var(--accent-light)) 30%,
+      white 60%
+    );
+  }
+</style>
